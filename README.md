@@ -1,6 +1,6 @@
 # Google WebFont Downloader
 
-goog-webfont-dl is a [Google WebFont](https://www.google.com/fonts) utility to download font files to your local machine.  It attempts to retreieve WOFF, TTF, EOT, and SVG formats using custom user-agent strings.  It will then output a CSS3 snippet that you can use in your project.
+goog-webfont-dl is a [Google WebFont](https://www.google.com/fonts) utility to download webfont files to your local machine.  It attempts to retreieve WOFF, TTF, EOT, and SVG file formats using custom user-agent strings.  It will then output a CSS3 snippet that you can use directly in your project.
 
 ## Usage
 
