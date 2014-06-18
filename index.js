@@ -6,6 +6,7 @@ var css = require("css");
 var async = require("async");
 var fs = require("fs");
 var path = require("path");
+var querystring = require("querystring");
 var _ = require("underscore");
 
 commander
@@ -68,7 +69,7 @@ var userAgentMap = {
   ttf:  "node.js"
 };
 
-var url = "http://fonts.googleapis.com/css?family=" + commander.font + ":" + commander.styles;
+var url = "http://fonts.googleapis.com/css?family=" + querystring.escape(commander.font) + ":" + commander.styles;
 
 console.log("Downloading webfont formats: " + formats + " to folder ." + path.sep + commander.font);
 console.log(url);
@@ -175,8 +176,12 @@ var getFormatCSS = function(format, callback) {
         for (var k = 0; k < urls.length; k++) {
           var url = urls[k].url;
           var ext = path.extname(url);
+          var format = urls[k].format;
+          if (_.isEmpty(ext) && format === "svg") {
+            ext = ".svg";
+          }
           var newFilename = defaultLocalName + ext;
-          subObj.urls[urls[k].format] = path.join(commander.prefix, newFilename);
+          subObj.urls[format] = path.join(commander.prefix, newFilename);
 
           fontUrls.push({url: url, name: newFilename});
         }
@@ -255,7 +260,7 @@ async.each(formats, getFormatCSS, function(err) {
                 url += "?#iefix";
               }
               else if (format === "svg") {
-                url += "#" + family;
+                url += "#" + family.replace(/\s+/g, "");
               }
 
               if (addComma) {
