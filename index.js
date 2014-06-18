@@ -92,8 +92,6 @@ var getFormatCSS = function(format, callback) {
       return callback(new Error("Bad response code: " + response.statusCode));
     }
 
-    //console.log(body);
-
     var ast = css.parse(body);
     var rules = ast.stylesheet.rules;
 
@@ -196,9 +194,6 @@ async.each(formats, getFormatCSS, function(err) {
     process.exit(1);
   }
 
-  //console.log(JSON.stringify(cssObj));
-  //process.exit(0);
-
   var downloadFont = function(obj, callback) {
     var out = fs.createWriteStream(path.join(commander.font, obj.name));
 
@@ -220,6 +215,7 @@ async.each(formats, getFormatCSS, function(err) {
         process.exit(1);
       }
 
+      // write out css with new file names
       for(var family in cssObj) {
         var familyObj = cssObj[family];
         for (var style in familyObj) {
