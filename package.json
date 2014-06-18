@@ -9,7 +9,8 @@
     "request": "latest",
     "css": "latest",
     "commander": "latest",
-    "async": "latest"
+    "async": "latest",
+    "underscore": "latest"
   },
   "repository": {
     "type": "git",

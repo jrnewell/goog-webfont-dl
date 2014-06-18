@@ -6,6 +6,7 @@ var css = require("css");
 var async = require("async");
 var fs = require("fs");
 var path = require("path");
+var _ = require("underscore");
 
 commander
   .version(require("./package.json").version)
@@ -15,6 +16,7 @@ commander
   .option('-s, --svg', 'Download SVG format')
   .option('-a, --all', 'Download all formats')
   .option('-f, --font [name]', 'Name of font')
+  .option('-o, --out [name]', 'CSS output file [use - for stdout]')
   .option('-p, --prefix [prefix]', 'Prefix to use in CSS output', path.join("..", "fonts"))
   .option('-y, --styles [string]', 'Style string [e.g. 300,400,300italic,400italic]', '100,300,400,700,900,100italic,300italic,400italic,700italic,900italic')
   .parse(process.argv);
@@ -43,6 +45,17 @@ else {
   }
 }
 
+var cssOut, usingStdout, cssOutFile;
+if (commander.out === "-") {
+  usingStdout = true;
+  cssOut = process.stdout;
+}
+else {
+  usingStdout = false;
+  cssOutFile = (commander.out ? commander.out : (commander.font + ".css"));
+  cssOut = fs.createWriteStream(cssOutFile);
+}
+
 if (formats.length == 0) {
   console.log("please select at least one format (or -a for all formats)");
   process.exit(1);
@@ -56,7 +69,9 @@ var userAgentMap = {
 };
 
 var url = "http://fonts.googleapis.com/css?family=" + commander.font + ":" + commander.styles;
-//console.log(url);
+
+console.log("Downloading webfont formats: " + formats + " to folder ." + path.sep + commander.font);
+console.log(url);
 
 var fontUrls = [];
 var cssObj = {};
@@ -144,7 +159,12 @@ var getFormatCSS = function(format, callback) {
         };
 
         var subObj = getSubObj(cssObj, [family, style, weight]);
-        subObj.localNames = (!subObj.localNames ? localNames : subObj.localNames.concat(localNames));
+        if (!subObj.localNames) {
+          subObj.localNames = [];
+        }
+        subObj.localNames = _.union(subObj.localNames, localNames);
+
+        //subObj.localNames = (!subObj.localNames ? localNames : subObj.localNames.concat(localNames));
         if (!subObj.defaultLocalName) {
           subObj.defaultLocalName = localNames[0].replace(/[\s]+/g, '-');
         }
@@ -207,16 +227,16 @@ async.each(formats, getFormatCSS, function(err) {
           for (var weight in styleObj) {
             var weightObj = styleObj[weight];
 
-            console.log("@font-face {");
-            console.log("  font-family: '" + family + "';");
-            console.log("  font-style: " + style + ";");
-            console.log("  font-weight: " + weight + ";");
+            cssOut.write("@font-face {\n");
+            cssOut.write("  font-family: '" + family + "';\n");
+            cssOut.write("  font-style: " + style + ";\n");
+            cssOut.write("  font-weight: " + weight + ";\n");
 
             // special handling for eot (ie 9)
             if (weightObj.urls["embedded-opentype"]) {
-              console.log("  src: url(" + weightObj.urls["embedded-opentype"] + ");");
+              cssOut.write("  src: url(" + weightObj.urls["embedded-opentype"] + ");\n");
             }
-            process.stdout.write("  src: ");
+            cssOut.write("  src: ");
 
             var addComma = false;
 
@@ -225,12 +245,12 @@ async.each(formats, getFormatCSS, function(err) {
               var localName = weightObj.localNames[i];
 
               if (addComma) {
-                process.stdout.write(", ");
+                cssOut.write(", ");
               }
               else {
                 addComma = true;
               }
-              process.stdout.write("local('" + localName + "')");
+              cssOut.write("local('" + localName + "')");
             }
 
             // url and formats
@@ -244,20 +264,36 @@ async.each(formats, getFormatCSS, function(err) {
               }
 
               if (addComma) {
-                process.stdout.write(", ");
+                cssOut.write(", ");
               }
               else {
                 addComma = true;
               }
-              process.stdout.write("url(" + url + ") format('" + format + "')");
+              cssOut.write("url(" + url + ") format('" + format + "')");
             }
 
-            console.log(";\n}\n");
+            cssOut.write(";\n}\n\n");
           }
         }
       }
 
-      process.exit(0);
+      if (!usingStdout) {
+        console.log ("CSS output was successfully written to " + cssOutFile);
+
+        cssOut.on("error", function(err) {
+          console.log("write error: " + err);
+          process.exit(1);
+        });
+
+        cssOut.on("finish", function(){
+          process.exit(0);
+        });
+
+        cssOut.end();
+      }
+      else {
+        process.exit(0);
+      }
     });
   };
 
