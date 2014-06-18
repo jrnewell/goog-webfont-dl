@@ -4,7 +4,7 @@
   "description": "utility to download google webfonts to disk",
   "bin": {
     "get-gfont": "./index.js"
-  }
+  },
   "dependencies": {
     "request": "latest",
     "css": "latest",
@@ -21,7 +21,7 @@
     "google",
     "woff",
     "ttf",
-    "eot",
+    "eot"
   ],
   "author": "James Newell <james.newell@gmail.com>",
   "license": "MIT",
