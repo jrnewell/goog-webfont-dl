@@ -1,9 +1,9 @@
 {
-  "name": "google-webfont-downloader",
+  "name": "goog-webfont-dl",
   "version": "0.0.1",
   "description": "utility to download google webfonts to disk",
   "bin": {
-    "get-gfont": "./index.js"
+    "goog-webfont-dl": "./index.js"
   },
   "dependencies": {
     "request": "latest",
@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/jrnewell/google-webfont-downloader.git"
+    "url": "git://github.com/jrnewell/goog-webfont-dl.git"
   },
   "keywords": [
     "webfont",
