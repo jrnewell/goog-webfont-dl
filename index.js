@@ -162,7 +162,6 @@ var getFormatCSS = function(format, callback) {
         }
         subObj.localNames = _.union(subObj.localNames, localNames);
 
-        //subObj.localNames = (!subObj.localNames ? localNames : subObj.localNames.concat(localNames));
         if (!subObj.defaultLocalName) {
           subObj.defaultLocalName = localNames[0].replace(/[\s]+/g, '-');
         }
