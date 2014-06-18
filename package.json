@@ -1,0 +1,35 @@
+{
+  "name": "google-webfont-downloader",
+  "version": "0.0.1",
+  "description": "utility to download google webfonts to disk",
+  "bin": {
+    "get-gfont": "./index.js"
+  }
+  "dependencies": {
+    "request": "latest",
+    "css": "latest",
+    "commander": "latest",
+    "async": "latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jrnewell/google-webfont-downloader.git"
+  },
+  "keywords": [
+    "webfont",
+    "font",
+    "google",
+    "woff",
+    "ttf",
+    "eot",
+  ],
+  "author": "James Newell <james.newell@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jrnewell/gulp-min-map/issues"
+  },
+  "engines": {
+    "node": ">=0.8",
+    "npm": ">=1.2.10"
+  }
+}
