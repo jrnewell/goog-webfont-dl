@@ -1,6 +1,6 @@
 {
   "name": "goog-webfont-dl",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A utility to download google webfonts to your local machine",
   "bin": {
     "goog-webfont-dl": "./index.js"
@@ -27,7 +27,7 @@
   "author": "James Newell <james.newell@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jrnewell/gulp-min-map/issues"
+    "url": "https://github.com/jrnewell/goog-webfont-dl/issues"
   },
   "engines": {
     "node": ">=0.8",
