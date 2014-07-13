@@ -7,7 +7,7 @@ var async = require("async");
 var fs = require("fs");
 var path = require("path");
 var querystring = require("querystring");
-var _ = require("underscore");
+var _ = require("lodash");
 
 commander
   .version(require("./package.json").version)
