@@ -95,8 +95,14 @@ var getFormatCSS = function(format, callback) {
 
     var ast = css.parse(body);
     var rules = ast.stylesheet.rules;
+    if (!_.isArray(rules)) {
+      return callback(new Error("Problem parsing returned body"));
+    }
 
     for (var i = 0; i < rules.length; i++) {
+      if (_.isUndefined(rules[i].type) || rules[i].type !== "font-face" || !_.isArray(rules[i].declarations)) {
+        continue;
+      }
       var declarations = rules[i].declarations;
 
       var family = null
