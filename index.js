@@ -89,6 +89,7 @@ var fontUrls = [];
 var cssObj = {};
 
 var getFormatCSS = function(format, callback) {
+  var _format = format;
   var opts = {
     url: url,
     headers: {
@@ -165,11 +166,24 @@ var getFormatCSS = function(format, callback) {
               continue;
             }
 
-            regEx = /url\((\S+?)\)\s*format\('?(\S+?)'?\)/;
-            match = regEx.exec(token);
-            if (match !== null) {
-              urls.push({url: match[1], format: match[2]});
-              continue;
+            if (_format !== "eot") {
+              regEx = /url\((\S+?)\)\s*format\('?(\S+?)'?\)/;
+              match = regEx.exec(token);
+              if (match !== null) {
+                urls.push({url: match[1], format: match[2]});
+                continue;
+              }
+            }
+            else {
+              regEx = /url\((\S+?)\)/;
+              match = regEx.exec(token);
+              if (match !== null) {
+                urls.push({url: match[1], format: "embedded-opentype"});
+                if (localNames.length == 0) {
+                  localNames.push(family);
+                }
+                continue;
+              }
             }
           }
         }
