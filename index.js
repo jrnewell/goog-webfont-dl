@@ -31,10 +31,10 @@ if (typeof commander.font === "undefined" || commander.font === null) {
   process.exit(1);
 }
 
-if (commander.destination === undefined || commander.destination === null) {
+if (typeof commander.destination === "undefined" || commander.destination === null) {
   commander.destination = commander.font;
 }
-commander.destination = "." + path.sep + commander.destination;
+commander.destination = path.normalize(commander.destination);
 
 var formats = [];
 if (commander.all) {
@@ -65,7 +65,7 @@ if (commander.out === "-") {
 }
 else {
   usingStdout = false;
-  cssOutFile = (commander.out ? commander.out : (commander.font + ".css"));
+  cssOutFile = (commander.out ? path.normalize(commander.out) : (commander.font + ".css"));
   cssOut = fs.createWriteStream(cssOutFile);
 }
 
