@@ -9,19 +9,20 @@ Usage: goog-webfont-dl [options]
 
   Options:
 
-    -h, --help             output usage information
-    -V, --version          output the version number
-    -t, --ttf              Download TTF format
-    -e, --eot              Download EOT format
-    -w, --woff             Download WOFF format
-    -W, --woff2            Download WOFF2 format
-    -s, --svg              Download SVG format
-    -a, --all              Download all formats
-    -f, --font [name]      Name of font
-    -o, --out [name]       CSS output file [use - for stdout]
-    -p, --prefix [prefix]  Prefix to use in CSS output
-    -u, --subset [string]  Subset string [e.g. latin,cyrillic]
-    -y, --styles [string]  Style string [e.g. 300,400,300italic,400italic]
+    -h, --help                     output usage information
+    -V, --version                  output the version number
+    -t, --ttf                      Download TTF format
+    -e, --eot                      Download EOT format
+    -w, --woff                     Download WOFF format
+    -W, --woff2                    Download WOFF2 format
+    -s, --svg                      Download SVG format
+    -a, --all                      Download all formats
+    -f, --font [name]              Name of font
+    -d, --destination [directory]  Save font in directory
+    -o, --out [name]               CSS output file [use - for stdout]
+    -p, --prefix [prefix]          Prefix to use in CSS output
+    -u, --subset [string]          Subset string [e.g. latin,cyrillic]
+    -y, --styles [string]          Style string [e.g. 300,400,300italic,400italic]
 ```
 
 Install as global command line utility

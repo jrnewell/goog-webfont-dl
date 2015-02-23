@@ -18,6 +18,7 @@ commander
   .option('-s, --svg', 'Download SVG format')
   .option('-a, --all', 'Download all formats')
   .option('-f, --font [name]', 'Name of font')
+  .option('-d, --destination [directory]', 'Save font in directory')
   .option('-o, --out [name]', 'CSS output file [use - for stdout]')
   .option('-p, --prefix [prefix]', 'Prefix to use in CSS output', path.join("..", "fonts"))
   .option('-u, --subset [string]', 'Subset string [e.g. latin,cyrillic]')
@@ -29,6 +30,11 @@ if (typeof commander.font === "undefined" || commander.font === null) {
   console.log("You need to give a font name");
   process.exit(1);
 }
+
+if (commander.destination === undefined || commander.destination === null) {
+  commander.destination = commander.font;
+}
+commander.destination = "." + path.sep + commander.destination;
 
 var formats = [];
 if (commander.all) {
@@ -82,7 +88,7 @@ if (commander.subset) {
   url += "&subset=" + querystring.escape(commander.subset);
 }
 
-console.log("Downloading webfont formats: " + formats + " to folder ." + path.sep + commander.font);
+console.log("Downloading webfont formats: " + formats + " to folder " + commander.destination);
 console.log(url);
 
 var fontUrls = [];
@@ -258,7 +264,7 @@ async.each(formats, getFormatCSS, function(err) {
   }
 
   var downloadFont = function(obj, callback) {
-    var out = fs.createWriteStream(path.join(commander.font, obj.name));
+    var out = fs.createWriteStream(path.join(commander.destination, obj.name));
 
     out.on("error", function(err) {
       callback(err);
@@ -368,9 +374,9 @@ async.each(formats, getFormatCSS, function(err) {
     });
   };
 
-  fs.exists(commander.font, function(exists) {
+  fs.exists(commander.destination, function(exists) {
     if (!exists) {
-      fs.mkdir(commander.font, function(err) {
+      fs.mkdir(commander.destination, function(err) {
         if (err) {
           console.log("mkdir error: " + err);
           process.exit(1);
