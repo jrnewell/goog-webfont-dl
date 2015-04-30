@@ -1,6 +1,6 @@
 # Google WebFont Downloader
 
-[![NPM version](http://img.shields.io/npm/v/async.svg)](https://www.npmjs.com/package/goog-webfont-dl)
+[![NPM version](http://img.shields.io/npm/v/goog-webfont-dl.svg)](https://www.npmjs.com/package/goog-webfont-dl)
 
 goog-webfont-dl is a [Google WebFont](https://www.google.com/fonts) utility to download webfont files to your local machine.  It attempts to retreieve WOFF, TTF, EOT, and SVG file formats using custom user-agent strings.  It will then output a CSS3 snippet that you can use directly in your project.
 
