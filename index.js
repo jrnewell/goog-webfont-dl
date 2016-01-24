@@ -5,7 +5,7 @@ var request = require("request");
 var css = require("css");
 var async = require("async");
 var fs = require("fs");
-var path = require("path");
+var path = require("path").posix;
 var querystring = require("querystring");
 var _ = require("lodash");
 

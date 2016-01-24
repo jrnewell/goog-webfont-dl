@@ -1,6 +1,6 @@
 {
   "name": "goog-webfont-dl",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "A utility to download google webfonts to your local machine",
   "bin": {
     "goog-webfont-dl": "./index.js"
@@ -30,7 +30,6 @@
     "url": "https://github.com/jrnewell/goog-webfont-dl/issues"
   },
   "engines": {
-    "node": ">=0.10",
-    "npm": ">=1.4"
+    "node": ">=0.12"
   }
 }
