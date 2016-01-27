@@ -5,7 +5,8 @@ var request = require("request");
 var css = require("css");
 var async = require("async");
 var fs = require("fs");
-var path = require("path").posix;
+var path = require("path");
+var posix = require("path").posix;
 var querystring = require("querystring");
 var _ = require("lodash");
 
@@ -20,7 +21,7 @@ commander
   .option('-f, --font [name]', 'Name of font')
   .option('-d, --destination [directory]', 'Save font in directory')
   .option('-o, --out [name]', 'CSS output file [use - for stdout]')
-  .option('-p, --prefix [prefix]', 'Prefix to use in CSS output', path.join("..", "fonts"))
+  .option('-p, --prefix [prefix]', 'Prefix to use in CSS output', posix.join("..", "fonts"))
   .option('-u, --subset [string]', 'Subset string [e.g. latin,cyrillic]')
   .option('-y, --styles [string]', 'Style string [e.g. 300,400,300italic,400italic]', '100,300,400,700,900,100italic,300italic,400italic,700italic,900italic')
 
@@ -233,14 +234,14 @@ var getFormatCSS = function(format, callback) {
 
         for (var k = 0; k < urls.length; k++) {
           var url = urls[k].url;
-          var ext = path.extname(url);
+          var ext = posix.extname(url);
           var format = urls[k].format;
           if (_.isEmpty(ext) && format === "svg") {
             ext = ".svg";
           }
           var newFilename = (subset === "default" ? defaultLocalName + ext :
             defaultLocalName + "-" + subset + ext);
-          subObj.urls[format] = path.join(commander.prefix, newFilename);
+          subObj.urls[format] = posix.join(commander.prefix, newFilename);
 
           fontUrls.push({url: url, name: newFilename});
         }
