@@ -25,6 +25,7 @@ Usage: goog-webfont-dl [options]
     -p, --prefix [prefix]          Prefix to use in CSS output
     -u, --subset [string]          Subset string [e.g. latin,cyrillic]
     -y, --styles [string]          Style string [e.g. 300,400,300italic,400italic]
+    -P, --proxy [string]           Proxy url [e.g. http://www.myproxy.com/]
 ```
 
 Install as global command line utility
