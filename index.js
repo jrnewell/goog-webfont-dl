@@ -24,6 +24,7 @@ commander
   .option('-p, --prefix [prefix]', 'Prefix to use in CSS output', posix.join("..", "fonts"))
   .option('-u, --subset [string]', 'Subset string [e.g. latin,cyrillic]')
   .option('-y, --styles [string]', 'Style string [e.g. 300,400,300italic,400italic]', '100,300,400,700,900,100italic,300italic,400italic,700italic,900italic')
+  .option('-P, --proxy [string]', 'Proxy url [e.g. http://www.myproxy.com/]')
 
   .parse(process.argv);
 
@@ -94,6 +95,10 @@ console.log(url);
 
 var fontUrls = [];
 var cssObj = {};
+
+if (commander.proxy) {
+  request = request.defaults({'proxy': commander.proxy});
+}
 
 var getFormatCSS = function(format, callback) {
   var _format = format;
