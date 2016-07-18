@@ -8,6 +8,7 @@ var fs = require("fs");
 var path = require("path");
 var posix = require("path").posix;
 var querystring = require("querystring");
+var mkdirp = require('mkdirp');
 var _ = require("lodash");
 
 commander
@@ -382,7 +383,7 @@ async.each(formats, getFormatCSS, function(err) {
 
   fs.exists(commander.destination, function(exists) {
     if (!exists) {
-      fs.mkdir(commander.destination, function(err) {
+      mkdirp(commander.destination, function(err) {
         if (err) {
           console.log("mkdir error: " + err);
           process.exit(1);
