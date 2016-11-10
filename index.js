@@ -1,6 +1,3 @@
-#!/usr/bin/env node
-
-var commander = require("commander");
 var request = require("request");
 var css = require("css");
 var async = require("async");
@@ -8,270 +5,287 @@ var fs = require("fs");
 var path = require("path");
 var posix = require("path").posix;
 var querystring = require("querystring");
-var mkdirp = require('mkdirp');
+var mkdirp = require("mkdirp");
 var _ = require("lodash");
 
-commander
-  .version(require("./package.json").version)
-  .option('-t, --ttf', 'Download TTF format')
-  .option('-e, --eot', 'Download EOT format')
-  .option('-w, --woff', 'Download WOFF format')
-  .option('-W, --woff2', 'Download WOFF2 format')
-  .option('-s, --svg', 'Download SVG format')
-  .option('-a, --all', 'Download all formats')
-  .option('-f, --font [name]', 'Name of font')
-  .option('-d, --destination [directory]', 'Save font in directory')
-  .option('-o, --out [name]', 'CSS output file [use - for stdout]')
-  .option('-p, --prefix [prefix]', 'Prefix to use in CSS output', posix.join("..", "fonts"))
-  .option('-u, --subset [string]', 'Subset string [e.g. latin,cyrillic]')
-  .option('-y, --styles [string]', 'Style string [e.g. 300,400,300italic,400italic]', '100,300,400,700,900,100italic,300italic,400italic,700italic,900italic')
-  .option('-P, --proxy [string]', 'Proxy url [e.g. http://www.myproxy.com/]')
+var allFormats = ["ttf", "eot", "woff", "woff2", "svg"];
+var allStyles = [
+  "100",       "300",       "400",       "700",       "900",
+  "100italic", "300italic", "400italic", "700italic", "900italic",
+];
 
-  .parse(process.argv);
+function dl(options) {
+  if (typeof options === "string") options = { font: options };
+  else if (options == null) options = {};
 
-if (typeof commander.font === "undefined" || commander.font === null) {
-  console.log("You need to give a font name");
-  process.exit(1);
-}
-
-if (typeof commander.destination === "undefined" || commander.destination === null) {
-  commander.destination = commander.font;
-}
-commander.destination = path.normalize(commander.destination);
-
-var formats = [];
-if (commander.all) {
-  formats = ["ttf", "eot", "woff", "woff2", "svg"];
-}
-else {
-  if (commander.ttf) {
-    formats.push("ttf");
+  if (options.font == null) {
+    throw new Error("You need to give a font name as dl('name') or dl({ font: 'name' })");
   }
-  if (commander.eot) {
-    formats.push("eot");
+
+  if (options.prefix == null) {
+    options.prefix = posix.join("..", "fonts", options.font);
   }
-  if (commander.woff) {
-    formats.push("woff");
+
+  if (options.destination == null) {
+    options.destination = options.font;
   }
-  if (commander.woff2) {
-    formats.push("woff2");
+  options.destination = path.normalize(options.destination);
+
+  var formats = options.formats;
+  if (formats == null || formats === "all") {
+    formats = allFormats;
   }
-  if (commander.svg) {
-    formats.push("svg");
+
+  var usingStdout = options.out === "-";
+
+  if (formats.length === 0) {
+    throw new Error("please select at least one format (or -a for all formats)");
   }
-}
 
-var cssOut, usingStdout, cssOutFile;
-if (commander.out === "-") {
-  usingStdout = true;
-  cssOut = process.stdout;
-}
-else {
-  usingStdout = false;
-  cssOutFile = (commander.out ? path.normalize(commander.out) : (commander.font + ".css"));
-  cssOut = fs.createWriteStream(cssOutFile);
-}
-
-if (formats.length == 0) {
-  console.log("please select at least one format (or -a for all formats)");
-  process.exit(1);
-}
-
-var userAgentMap = {
-  woff2: "Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/40.0",
-  woff: "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)",
-  eot:  "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0)",
-  svg:  "Mozilla/4.0 (iPad; CPU OS 4_0_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/4.1 Mobile/9A405 Safari/7534.48.3",
-  ttf:  "node.js"
-};
-
-var url = "http://fonts.googleapis.com/css?family=" + querystring.escape(commander.font) + ":" + commander.styles;
-
-if (commander.subset) {
-  url += "&subset=" + querystring.escape(commander.subset);
-}
-
-console.log("Downloading webfont formats: " + formats + " to folder " + commander.destination);
-console.log(url);
-
-var fontUrls = [];
-var cssObj = {};
-
-if (commander.proxy) {
-  request = request.defaults({'proxy': commander.proxy});
-}
-
-var getFormatCSS = function(format, callback) {
-  var _format = format;
-  var opts = {
-    url: url,
-    headers: {
-      "User-Agent": userAgentMap[format]
-    }
+  var userAgentMap = {
+    woff2: "Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/40.0",
+    woff: "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)",
+    eot:  "Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0)",
+    svg:  "Mozilla/4.0 (iPad; CPU OS 4_0_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/4.1 Mobile/9A405 Safari/7534.48.3",
+    ttf:  "node.js"
   };
-
-  request(opts, function(err, response, body) {
-    if (err) {
-      return callback(err);
+  
+  for (var fmt of formats) {
+    if (!userAgentMap[fmt]) {
+      throw new Error("Unknown format “" + fmt + "”");
     }
-    else if (response.statusCode !== 200) {
-      return callback(new Error("Bad response code: " + response.statusCode));
-    }
+  }
+  
+  if (!options.styles) {
+    options.styles = allStyles;
+  }
 
-    var ast = css.parse(body);
-    var rules = ast.stylesheet.rules;
-    if (!_.isArray(rules)) {
-      return callback(new Error("Problem parsing returned body"));
-    }
+  var url = "http://fonts.googleapis.com/css?family=" + querystring.escape(options.font) + ":" + options.styles;
 
-    var subset = null;
-    for (var i = 0; i < rules.length; i++) {
-      var rule = rules[i];
-      if (_.isUndefined(rule.type)) {
-        continue;
+  if (options.subset) {
+    url += "&subset=" + querystring.escape(options.subset);
+  }
+
+  if (options.verbose) {
+    console.log("Downloading webfont formats: “" + formats + "” to folder “" + options.destination + "”");
+    console.log(url);
+  }
+
+  var fontUrls = [];
+  var cssObj = {};
+
+  if (options.proxy) {
+    request = request.defaults({"proxy": options.proxy});
+  }
+
+  function getFormatCSS(format, callback) {
+    var _format = format;
+    var opts = {
+      url: url,
+      headers: {
+        "User-Agent": userAgentMap[format]
+      }
+    };
+
+    request(opts, function(err, response, body) {
+      if (err) {
+        return callback(err);
+      }
+      else if (response.statusCode !== 200) {
+        return callback(new Error("Bad response code: " + response.statusCode));
       }
 
-      if (rule.type === "comment") {
-        subset = rule.comment.trim();
-        continue;
-      }
-      else if (subset === null) {
-        subset = "default";
+      var ast = css.parse(body);
+      var rules = ast.stylesheet.rules;
+      if (!_.isArray(rules)) {
+        return callback(new Error("Problem parsing returned body"));
       }
 
-      if (rules[i].type !== "font-face" || !_.isArray(rules[i].declarations)) {
-        subset = null;
-        continue;
-      }
-      var declarations = rules[i].declarations;
-
-      var family = null
-      var style = null;
-      var weight = null;
-      var urls = [];
-      var localNames = [];
-      var unicodeRange = null;
-
-      for (var j = 0; j < declarations.length; j++) {
-        var declaration = declarations[j];
-        if (declaration.property === "font-family") {
-          family = declaration.value.replace(/['"]/g, '');
-
-          if (family !== commander.font) {
-            console.log("Warning: google returned a font-family [" + family + "] different than " + commander.font);
-          }
+      var subset = null;
+      for (var i = 0; i < rules.length; i++) {
+        var rule = rules[i];
+        if (_.isUndefined(rule.type)) {
+          continue;
         }
-        else if (declaration.property === "font-style") {
-          style = declaration.value.replace(/['"]/g, '');
-        }
-        else if (declaration.property === "font-weight") {
-          weight = declaration.value.replace(/['"]/g, '');
-        }
-        else if (declaration.property === "src") {
-          var tokens = declaration.value.split(",");
 
-          for (var k = 0; k < tokens.length; k++) {
-            var token = tokens[k].replace(/^\s+|[\s;]+$/, '');
-            var regEx = /local\('?(.+?)'?\)/g;
-            var match = regEx.exec(token);
-            if (match !== null) {
-              localNames.push(match[1]);
-              continue;
+        if (rule.type === "comment") {
+          subset = rule.comment.trim();
+          continue;
+        }
+        else if (subset === null) {
+          subset = "default";
+        }
+
+        if (rules[i].type !== "font-face" || !_.isArray(rules[i].declarations)) {
+          subset = null;
+          continue;
+        }
+        var declarations = rules[i].declarations;
+
+        var family = null;
+        var style = null;
+        var weight = null;
+        var urls = [];
+        var localNames = [];
+        var unicodeRange = null;
+
+        for (var j = 0; j < declarations.length; j++) {
+          var declaration = declarations[j];
+          if (declaration.property === "font-family") {
+            family = declaration.value.replace(/['"]/g, "");
+
+            if (family !== options.font) {
+              console.warn("Warning: google returned a font-family [" + family + "] different than " + options.font);
             }
+          }
+          else if (declaration.property === "font-style") {
+            style = declaration.value.replace(/['"]/g, "");
+          }
+          else if (declaration.property === "font-weight") {
+            weight = declaration.value.replace(/['"]/g, "");
+          }
+          else if (declaration.property === "src") {
+            var tokens = declaration.value.split(",");
 
-            if (_format !== "eot") {
-              regEx = /url\((\S+?)\)\s*format\('?(\S+?)'?\)/;
-              match = regEx.exec(token);
+            for (var k = 0; k < tokens.length; k++) {
+              var token = tokens[k].replace(/^\s+|[\s;]+$/, "");
+              var regEx = /local\('?(.+?)'?\)/g;
+              var match = regEx.exec(token);
               if (match !== null) {
-                urls.push({url: match[1], format: match[2]});
+                localNames.push(match[1]);
                 continue;
               }
-            }
-            else {
-              regEx = /url\((\S+?)\)/;
-              match = regEx.exec(token);
-              if (match !== null) {
-                urls.push({url: match[1], format: "embedded-opentype"});
-                if (localNames.length == 0) {
-                  localNames.push(family);
+
+              if (_format !== "eot") {
+                regEx = /url\((\S+?)\)\s*format\('?(\S+?)'?\)/;
+                match = regEx.exec(token);
+                if (match !== null) {
+                  urls.push({url: match[1], format: match[2]});
+                  continue;
                 }
-                continue;
+              }
+              else {
+                regEx = /url\((\S+?)\)/;
+                match = regEx.exec(token);
+                if (match !== null) {
+                  urls.push({url: match[1], format: "embedded-opentype"});
+                  if (localNames.length === 0) {
+                    localNames.push(family);
+                  }
+                  continue;
+                }
               }
             }
           }
+          else if (declaration.property === "unicode-range") {
+            unicodeRange = declaration.value.replace(/['"]/g, "");
+          }
         }
-        else if (declaration.property === "unicode-range") {
-          unicodeRange = declaration.value.replace(/['"]/g, '');
-        }
-      }
 
-      if (urls.length > 0 && localNames.length > 0 && subset !== null &&
-          family !== null && style !== null && weight !== null)
-      {
-        var getSubObj = function(obj, props) {
-          var curr = obj;
-          for(var i = 0; i < props.length; i++) {
-            var prop = props[i];
-            var subObj = curr[prop];
-            if (!subObj) {
-              subObj = {};
-              curr[prop] = subObj;
+        if (urls.length > 0 && localNames.length > 0 && subset !== null &&
+            family !== null && style !== null && weight !== null)
+        {
+          var subObj = getSubObj(cssObj, [subset, family, style, weight]);
+          if (!subObj.localNames) {
+            subObj.localNames = [];
+          }
+          subObj.localNames = _.union(subObj.localNames, localNames);
+
+          if (!subObj.defaultLocalName) {
+            subObj.defaultLocalName = localNames[0].replace(/[\s]+/g, "-");
+          }
+          var defaultLocalName = subObj.defaultLocalName;
+
+          // add urls
+          if (!subObj.urls) {
+            subObj.urls = {};
+          }
+
+          for (var u = 0; u < urls.length; u++) {
+            var url = urls[u].url;
+            var ext = posix.extname(url);
+            var format = urls[u].format;
+            if (_.isEmpty(ext) && format === "svg") {
+              ext = ".svg";
             }
-            curr = subObj;
+            var newFilename = (subset === "default" ? defaultLocalName + ext :
+              defaultLocalName + "-" + subset + ext);
+            subObj.urls[format] = posix.join(options.prefix, newFilename);
+
+            fontUrls.push({url: url, name: newFilename});
           }
-          return curr;
-        };
 
-        var subObj = getSubObj(cssObj, [subset, family, style, weight]);
-        if (!subObj.localNames) {
-          subObj.localNames = [];
-        }
-        subObj.localNames = _.union(subObj.localNames, localNames);
-
-        if (!subObj.defaultLocalName) {
-          subObj.defaultLocalName = localNames[0].replace(/[\s]+/g, '-');
-        }
-        var defaultLocalName = subObj.defaultLocalName;
-
-        // add urls
-        if (!subObj.urls) {
-          subObj.urls = {};
-        }
-
-        for (var k = 0; k < urls.length; k++) {
-          var url = urls[k].url;
-          var ext = posix.extname(url);
-          var format = urls[k].format;
-          if (_.isEmpty(ext) && format === "svg") {
-            ext = ".svg";
+          // add unicode range
+          if (unicodeRange) {
+            subObj.unicodeRange = unicodeRange;
           }
-          var newFilename = (subset === "default" ? defaultLocalName + ext :
-            defaultLocalName + "-" + subset + ext);
-          subObj.urls[format] = posix.join(commander.prefix, newFilename);
-
-          fontUrls.push({url: url, name: newFilename});
         }
-
-        // add unicode range
-        if (unicodeRange) {
-          subObj.unicodeRange = unicodeRange;
-        }
+        subset = null;
       }
-      subset = null;
-    }
 
-    callback();
+      callback();
+    });
+  }
+
+  return new Promise(function(resolve, reject) {
+    async.each(formats, getFormatCSS, function(err) {
+      if (err) {
+        return reject(new Error("Request error: " + err));
+      }
+
+      mkdirp(options.destination, function(err) {
+        if (err) {
+          throw new Error("mkdir error: " + err);
+        }
+
+        doDownload(fontUrls, usingStdout, cssObj, options.out, options.destination, options.verbose)
+          .then(resolve);
+      });
+    });
   });
 }
 
-async.each(formats, getFormatCSS, function(err) {
-  if (err) {
-    console.log("Request error: " + err);
-    process.exit(1);
+function getSubObj(obj, props) {
+  var curr = obj;
+  for(var i = 0; i < props.length; i++) {
+    var prop = props[i];
+    var subObj = curr[prop];
+    if (!subObj) {
+      subObj = {};
+      curr[prop] = subObj;
+    }
+    curr = subObj;
   }
+  return curr;
+}
 
-  var downloadFont = function(obj, callback) {
-    var out = fs.createWriteStream(path.join(commander.destination, obj.name));
+function FakeFile() {
+  this.s = "";
+}
+FakeFile.prototype.write = function(s) {
+  this.s += s;
+};
+FakeFile.prototype.toString = function() {
+  return this.s;
+};
+
+function getFile(outFile) {
+  if (outFile === "-") {
+    return process.stdout;
+  } else if (outFile == null) {
+    return new FakeFile();
+  } else if (outFile instanceof Buffer) {
+    return outFile;
+  } else if (typeof outFile === "string") {
+    return fs.createWriteStream(path.normalize(outFile));
+  } else {
+    throw new Error("options.out is of unknown type");
+  }
+}
+
+function doDownload(fontUrls, usingStdout, cssObj, cssOutFile, destination, verbose) {
+  function downloadFont(obj, callback) {
+    var out = fs.createWriteStream(path.join(destination, obj.name));
 
     out.on("error", function(err) {
       callback(err);
@@ -282,14 +296,16 @@ async.each(formats, getFormatCSS, function(err) {
     });
 
     request(obj.url).pipe(out);
-  };
+  }
 
-  var doDownload = function() {
+  return new Promise(function(resolve, reject) {
     async.each(fontUrls, downloadFont, function(err) {
       if (err) {
-        console.log("Request error: " + err);
-        process.exit(1);
+        return reject(new Error("Request error: " + err));
       }
+      
+      // defer this until here so no CSS is created if an error occurred. 
+      var cssOut = getFile(cssOutFile);
 
       // write out css with new file names
       for(var subset in cssObj) {
@@ -361,39 +377,24 @@ async.each(formats, getFormatCSS, function(err) {
         }
       }
 
-      if (!usingStdout) {
-        console.log ("CSS output was successfully written to " + cssOutFile);
-
+      if (!usingStdout && typeof cssOutFile === "string") {
+        if (verbose) {
+          console.log("CSS output was successfully written to “" + cssOutFile + "”");
+        }
+        
         cssOut.on("error", function(err) {
-          console.log("write error: " + err);
-          process.exit(1);
-        });
-
-        cssOut.on("finish", function(){
-          process.exit(0);
+          return reject(new Error("write error: " + err));
         });
 
         cssOut.end();
       }
-      else {
-        process.exit(0);
-      }
+      
+      resolve((cssOutFile == null) ? cssOut.toString() : null);
     });
-  };
-
-  fs.exists(commander.destination, function(exists) {
-    if (!exists) {
-      mkdirp(commander.destination, function(err) {
-        if (err) {
-          console.log("mkdir error: " + err);
-          process.exit(1);
-        }
-
-        doDownload();
-      });
-    }
-    else {
-      doDownload();
-    }
   });
-});
+}
+
+module.exports = dl;
+module.exports.default = dl;  // ES6: import downloader from 'goog-webfont-dl'
+module.exports.formats = allFormats;
+module.exports.styles = allStyles;

@@ -7,7 +7,7 @@ goog-webfont-dl is a [Google WebFont](https://www.google.com/fonts) utility to d
 ## Usage
 
 ```
-Usage: goog-webfont-dl [options]
+Usage: goog-webfont-dl [options] <fontname>
 
   Options:
 
@@ -19,10 +19,10 @@ Usage: goog-webfont-dl [options]
     -W, --woff2                    Download WOFF2 format
     -s, --svg                      Download SVG format
     -a, --all                      Download all formats
-    -f, --font [name]              Name of font
-    -d, --destination [directory]  Save font in directory
-    -o, --out [name]               CSS output file [use - for stdout]
-    -p, --prefix [prefix]          Prefix to use in CSS output
+    -f, --font [fontname]          Name of font
+    -d, --destination [directory]  Save font in directory [default: <fontname>/]
+    -o, --out [csspath]            CSS output file [use - for stdout. default: <fontname>.css]
+    -p, --prefix [prefix]          Prefix to use in CSS output [default: ../fonts/<fontname>/]
     -u, --subset [string]          Subset string [e.g. latin,cyrillic]
     -y, --styles [string]          Style string [e.g. 300,400,300italic,400italic]
     -P, --proxy [string]           Proxy url [e.g. http://www.myproxy.com/]
@@ -33,6 +33,33 @@ Install as global command line utility
 ```shell
 npm install -g goog-webfont-dl
 ```
+
+## Library
+
+This package is compatible with Node 0.12 and above.
+
+```js
+const downloader = require('goog-webfont-dl')
+// or
+import downloader from 'goog-webfont-dl'
+
+const css = downloader('Some Font name')
+// or
+const css = downloader({
+  // required:
+  font: 'Some Font name',
+  // defaults:
+  formats:     downloader.formats, // Font formats. 
+  destination: font,               // Save font here
+  out:         null, // = return   // CSS file. Use '-' for stdout, and nothing to return the CSS code
+  prefix:      `../fonts/${font}`, // Prefix to use in CSS output
+  subset:      null, // = none     // Subset string/array, e.g. 'latin,cyrillic'
+  styles:      downloader.styles,  // Style string/array, e.g. '300,400,300italic,400italic'
+  proxy:       null, // = none     // Proxy url, e.g. 'https://myproxy.com'
+})
+```
+
+Since `Array.prototype.toString` works by joining array elements with commas, `subset` or `styles` can be specified as array as well.
 
 ## Example
 
