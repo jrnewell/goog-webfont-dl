@@ -14,12 +14,12 @@ var allStyles = [
   "100italic", "300italic", "400italic", "700italic", "900italic",
 ];
 
-function dl(options) {
+function downloader(options) {
   if (typeof options === "string") options = { font: options };
   else if (options == null) options = {};
 
   if (options.font == null) {
-    throw new Error("You need to give a font name as dl('name') or dl({ font: 'name' })");
+    throw new Error("You need to give a font name as downloader('name') or downloader({ font: 'name' })");
   }
 
   if (options.prefix == null) {
@@ -49,13 +49,13 @@ function dl(options) {
     svg:  "Mozilla/4.0 (iPad; CPU OS 4_0_1 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/4.1 Mobile/9A405 Safari/7534.48.3",
     ttf:  "node.js"
   };
-  
+
   for (var fmt of formats) {
     if (!userAgentMap[fmt]) {
       throw new Error("Unknown format “" + fmt + "”");
     }
   }
-  
+
   if (!options.styles) {
     options.styles = allStyles;
   }
@@ -272,13 +272,17 @@ FakeFile.prototype.toString = function() {
 function getFile(outFile) {
   if (outFile === "-") {
     return process.stdout;
-  } else if (outFile == null) {
+  }
+  else if (outFile == null) {
     return new FakeFile();
-  } else if (outFile instanceof Buffer) {
+  }
+  else if (outFile instanceof Buffer) {
     return outFile;
-  } else if (typeof outFile === "string") {
+  }
+  else if (typeof outFile === "string") {
     return fs.createWriteStream(path.normalize(outFile));
-  } else {
+  }
+  else {
     throw new Error("options.out is of unknown type");
   }
 }
@@ -303,8 +307,8 @@ function doDownload(fontUrls, usingStdout, cssObj, cssOutFile, destination, verb
       if (err) {
         return reject(new Error("Request error: " + err));
       }
-      
-      // defer this until here so no CSS is created if an error occurred. 
+
+      // defer this until here so no CSS is created if an error occurred.
       var cssOut = getFile(cssOutFile);
 
       // write out css with new file names
@@ -381,20 +385,20 @@ function doDownload(fontUrls, usingStdout, cssObj, cssOutFile, destination, verb
         if (verbose) {
           console.log("CSS output was successfully written to “" + cssOutFile + "”");
         }
-        
+
         cssOut.on("error", function(err) {
           return reject(new Error("write error: " + err));
         });
 
         cssOut.end();
       }
-      
+
       resolve((cssOutFile == null) ? cssOut.toString() : null);
     });
   });
 }
 
-module.exports = dl;
-module.exports.default = dl;  // ES6: import downloader from 'goog-webfont-dl'
+module.exports = downloader;
+module.exports.default = downloader;  // ES6: import downloader from 'goog-webfont-dl'
 module.exports.formats = allFormats;
 module.exports.styles = allStyles;

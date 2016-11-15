@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 var commander = require("commander");
-
 var downloader = require(".");
 
 commander
