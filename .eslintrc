@@ -1,0 +1,41 @@
+{
+    "env": { "node": true },
+    "globals": { "Promise": true },
+    "parserOptions": {
+        "ecmaVersion": 6
+    },
+    "ecmaFeatures": {
+        "forOf": true,
+        
+        "arrowFunctions": false,
+        "binaryLiterals": false,
+        "blockBindings": false,
+        "classes": false,
+        "defaultParams": false,
+        "destructuring": false,
+        "generators": false,
+        "modules": false,
+        "objectLiteralComputedProperties": false,
+        "objectLiteralDuplicateProperties": false,
+        "objectLiteralShorthandMethods": false,
+        "objectLiteralShorthandProperties": false,
+        "octalLiterals": false,
+        "regexUFlag": false,
+        "regexYFlag": false,
+        "restParams": false,
+        "spread": false,
+        "superInFunctions": false,
+        "templateStrings": false,
+        "unicodeCodePointEscapes": false
+    },
+    "extends": "eslint:recommended",
+    "rules": {
+        "indent":          [2, 2],
+        "linebreak-style": [2, "unix"],
+        "quotes":          [2, "double"],
+        "semi":            [2, "always"],
+        "eqeqeq":          [2, "always", { "null": "ignore" }],
+        "func-style":      [2, "declaration"],
+        "no-console":      [0]
+    }
+}
