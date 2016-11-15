@@ -58,4 +58,7 @@ if (!commander.out) {
 commander.verbose = !commander.quiet;
 delete commander.quiet;
 
-downloader(commander);
+downloader(commander).catch(function(err) {
+  console.error(err.stack);
+  process.exit(1);
+});
