@@ -1,3 +1,4 @@
+var Promise = require("bluebird");
 var request = require("request");
 var css = require("css");
 var posix = require("path").posix;
