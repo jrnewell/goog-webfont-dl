@@ -30,12 +30,14 @@
     },
     "extends": "eslint:recommended",
     "rules": {
-        "indent":          [2, 2],
-        "linebreak-style": [2, "unix"],
-        "quotes":          [2, "double"],
-        "semi":            [2, "always"],
-        "eqeqeq":          [2, "always", { "null": "ignore" }],
-        "func-style":      [2, "declaration"],
-        "no-console":      [0]
+        "indent":             [2, 2],
+        "linebreak-style":    [2, "unix"],
+        "quotes":             [2, "double"],
+        "semi":               [2, "always"],
+        "eqeqeq":             [2, "always", { "null": "ignore" }],
+        "brace-style":        [2, "stroustrup"],
+        "func-style":         [2, "declaration"],
+        "no-console":         [0],
+        "no-trailing-spaces": [2]
     }
 }
