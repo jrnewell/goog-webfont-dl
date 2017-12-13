@@ -49,6 +49,12 @@ for (var f of downloader.formats) {
   delete commander[f];
 }
 
+// in case a font combined with + instead of spaces was given
+var plusRegEx = new RegExp('\\+', 'g');
+if (plusRegEx.test(commander.font)) {
+  commander.font = commander.font.replace(plusRegEx, ' ');
+}
+
 // set CSS file
 if (!commander.out) {
   commander.out = commander.font + ".css";
