@@ -49,7 +49,7 @@ function googWebFontDl(options) {
     options.styles = allStyles;
   }
 
-  var url = "http://fonts.googleapis.com/css?family=" + querystring.escape(options.font) + ":" + options.styles;
+  var url = "https://fonts.googleapis.com/css?family=" + querystring.escape(options.font) + ":" + options.styles;
 
   if (options.subset) {
     url += "&subset=" + querystring.escape(options.subset);
