@@ -184,6 +184,14 @@ Lato.css
 }
 ```
 
+Font Name:
+
+If the fontname uses spaces, surround the argument with quotes (or use + instead of spaces)
+
+```shell
+goog-webfont-dl -a -f "Source Sans Pro" -y 300,400,600,700,300italic,400italic,600italic
+```
+
 ## License
 
 [MIT License](http://en.wikipedia.org/wiki/MIT_License)
