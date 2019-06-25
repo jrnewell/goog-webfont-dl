@@ -1,18 +1,18 @@
 {
   "name": "goog-webfont-dl",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A utility to download google webfonts to your local machine",
   "bin": {
     "goog-webfont-dl": "./cli.js"
   },
   "main": "./index.js",
   "dependencies": {
-    "request": "~2.53.0",
-    "css": "~2.1.0",
-    "commander": "~2.6.0",
-    "lodash": "~3.1.0",
-    "mkdirp": "~0.5.1",
-    "bluebird": "~3.4.6"
+    "request": "^2.88.0",
+    "css": "^2.2.4",
+    "commander": "^2.20.0",
+    "lodash": "^4.17.11",
+    "mkdirp": "^0.5.1",
+    "bluebird": "^3.5.5"
   },
   "repository": {
     "type": "git",
@@ -32,9 +32,9 @@
     "url": "https://github.com/jrnewell/goog-webfont-dl/issues"
   },
   "engines": {
-    "node": ">=0.12"
+    "node": ">=6"
   },
   "devDependencies": {
-    "eslint": "^3.9.1"
+    "eslint": "^5.16.0"
   }
 }
