@@ -147,7 +147,7 @@ function parseCSS(format, options, results, cssText) {
 
       if (!subObj.defaultLocalName) {
         // some fonts do not have a local name provided - generate it from the font name
-        if (localNames.length == 0) subObj.defaultLocalName = family+" - "+style;
+        if (localNames.length == 0) subObj.defaultLocalName = (family+"-"+style+"-"+weight).replace(/[\s]+/g, "-");
         else subObj.defaultLocalName = localNames[0].replace(/[\s]+/g, "-");
       }
       var defaultLocalName = subObj.defaultLocalName;
