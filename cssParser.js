@@ -136,7 +136,7 @@ function parseCSS(format, options, results, cssText) {
       }
     }
 
-    if (urls.length > 0 && localNames.length > 0 && subset !== null &&
+    if (urls.length > 0 && subset !== null &&
         family !== null && style !== null && weight !== null)
     {
       var subObj = getSubObj(results.cssObj, [subset, family, style, weight]);
@@ -146,6 +146,8 @@ function parseCSS(format, options, results, cssText) {
       subObj.localNames = _.union(subObj.localNames, localNames);
 
       if (!subObj.defaultLocalName) {
+        // some fonts do not have a local name provided - generate it from the font name
+        if (localNames.length == 0) subObj.defaultLocalName = family+" - "+style;
         subObj.defaultLocalName = localNames[0].replace(/[\s]+/g, "-");
       }
       var defaultLocalName = subObj.defaultLocalName;
